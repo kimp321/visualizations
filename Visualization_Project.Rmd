@@ -1,0 +1,117 @@
+---
+title: "Visualization_Project"
+author: "kimp"
+date: "10/19/2017"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+df <- read.csv("formative1-results-DI.csv")
+df <- select(df, -pull.request, -attached.rmd)
+```
+
+
+```{r}
+Q <- as.data.frame(df %>% group_by(Q1) %>% tally())
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q2) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q3) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q4) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q5) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q6) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q7) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q8) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q9) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q10) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q11) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q12) %>% tally()))
+Q <- bind_rows(Q, as.data.frame(df %>% group_by(Q13) %>% tally()))
+
+```
+
+```{r}
+Qx <- select(Q, -n)
+```
+
+```{r}
+Qx <- gather(Qx, key = "key", value ="id")
+```
+
+
+```{r}
+Qx <- na.omit(Qx)
+```
+
+```{r}
+Q <- select(Q, n)
+Qx <- bind_cols(Qx, Q)
+```
+
+```{r}
+Qx %>% group_by(id) %>% count()
+```
+
+```{r}
+Qx[Qx==""] <- 'Did not answer'
+```
+
+```{r}
+Qx %>% group_by(id) %>% count()
+```
+
+```{r}
+Qx <- spread(Qx, key, n, fill = 0)
+```
+
+```{r}
+Qx <- Qx[ ,c('id', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10', 'Q11', 'Q12', 'Q13')] 
+```
+
+
+```{r}
+y <- Qx %>% filter(id == 'Yes') %>% select(-id) %>% t()
+n <- Qx %>% filter(id == 'No')  %>% select(-id) %>% t()
+na <- Qx %>% filter(id == 'Did not answer') %>% select(-id) %>% t()
+```
+
+```{r}
+plot(y, ylim = c(0,30), type = 'n', main = 'Did students answer every question on the test?',xlab = 'Question Numbers', ylab = 'Number of Students')
+
+axis(1, at=1:14)
+axis(2, at=0:30, labels = FALSE)
+
+lines(y, type='b', col = 'green')
+lines(n, type='b', col = 'red')
+lines(na, type='b', col = 'blue')
+
+legend(1, 15, title = 'Legend', c('Yes','No','NA'), col=c('green', 'red', 'blue'), lwd = 4);
+
+```
+
+```{r}
+boxplot(y, horizontal = TRUE)
+boxplot(n, horizontal = TRUE)
+boxplot(na, horizontal = TRUE)
+```
+
+
+```{r}
+
+barplot(t(y), main="Questions Answered (yes)",
+  xlab="Question Number", ylab= "# of Students", col="green")
+
+barplot(t(n), main="Questions Not Answered (no)",
+  xlab="Question Number", ylab= "# of Students", col="red")
+
+barplot(t(na), main="Missing Data (na)",
+  xlab="Question Number", ylab= "# of Students", col="blue")
+
+all <- cbind(y,n,na)
+barplot(t(all), main="Questions Answered", xlab="Question Number", ylab= "# of Students", col=c("green", "red", "blue"),  legend = c('Yes','No','Na'))
+
+```
+
+
+
+
